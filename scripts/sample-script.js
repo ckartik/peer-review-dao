@@ -25,7 +25,9 @@ async function main() {
 
   await dao.deployed();
 
+  await dao.purposePaper("Kartik")
   console.log("DAO deployed to:", dao.address);
+  console.log("DAO has num of proposed: ", dao.numProposals)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

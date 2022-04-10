@@ -48,7 +48,7 @@ contract PeerReviewDAO {
     uint256 public numProposals;
 
     // Create a Proposal for Research Paper
-    function proposePaper(string memory _paper) external returns (uint256) {
+    function proposePaper(string memory _paper) public returns (uint256) {
         ProposedPaper storage proposal = proposals[numProposals];
         proposal.paper = _paper;
         numProposals++;
@@ -92,6 +92,14 @@ contract PeerReviewDAO {
         proposal.decided = true;
         acceptedPapers.push(proposal);
 
+    }
+    function getProposal(uint _id) external view returns (ProposedPaper memory) {
+        require(_id <= numProposals, "ID_OUT_OF_BOUNDS");
+        return proposals[_id];
+    }
+
+    function getTotalProposals() external view returns (uint) {
+        return numProposals;
     }
 
     // Join the DAO
