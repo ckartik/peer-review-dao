@@ -39,7 +39,7 @@ contract PeerReviewDAO {
     mapping(uint256 => ProposedPaper) public proposals;
     mapping(address => Reviewer) public reviewers;
 
-    uint256 numProposals;
+    uint256 public numProposals;
 
     modifier reviewerOnly() {
         require(
