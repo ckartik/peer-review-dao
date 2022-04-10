@@ -8,5 +8,17 @@
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.2",
     "hardhat": "^2.9.3"
+  },
+  "dependencies": {
+    "@alch/alchemy-web3": "^1.2.5",
+    "@ipld/car": "^4.0.0",
+    "@ipld/dag-cbor": "^7.0.0",
+    "@ipld/dag-json": "^8.0.1",
+    "compile": "^0.0.2",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "ipfs-http-client": "^56.0.1",
+    "multiformats": "^9.6.4",
+    "web3": "^1.7.1"
   }
 }

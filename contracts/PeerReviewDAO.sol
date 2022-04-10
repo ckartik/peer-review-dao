@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "hardhat/console.sol";
+
 interface IPeerReviewersNFT {}
 
 // Peer Review DAO
@@ -63,7 +65,8 @@ contract PeerReviewDAO {
         reviewerOnly
     {
         ProposedPaper storage proposal = proposals[_proposalId];
-        
+        console.log("%s JUST VOTED", msg.sender);
+
         require(!proposal.decided,  "INACTIVE_PROPOSAL");
 
         bool notVoted = true;
@@ -103,6 +106,14 @@ contract PeerReviewDAO {
     }
 
     // Join the DAO
+    function joinDAO() external {
+        console.log("%s JOINED DAO", msg.sender);
+        reviewers.push(msg.sender);
+    }
+
+    function getReviwers() external view returns  (address[] memory) {
+        return reviewers;
+    }
 
     // Leave the DAO
 
