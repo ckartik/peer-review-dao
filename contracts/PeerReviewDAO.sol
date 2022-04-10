@@ -6,61 +6,56 @@ interface IPeerReviewersNFT {}
 // Peer Review DAO
 contract PeerReviewDAO {
     // List of accepted papers.
+    uint256 public immutable MIN_VOTES;
+    
+    constructor(uint256 minVotes) {
+        MIN_VOTES = minVotes;
+    }
+
     ProposedPaper[] acceptedPapers;
 
-    // Enum vote
-    // TODO(@ckartik): The REVISE
-    enum VoteType {
-        PUBLISH,
-        PUBLISH_WITH_REVISION,
-        REJECT
-    }
-
-    struct Paper {
-        string basePaper;
-        string[] revisions;
-    }
-
-    struct ProposedPaper {
-        Paper paper;
-        bool decided;
-        uint256 rejectVotes;
-        uint256 publishVotes;
-        uint256 voteDeadline;
-        mapping(address => bool) voterRegister;
-    }
-
-    struct Reviewer {
-        uint256 joinedAt;
-        // Array of PeerReviewersNFTs locked up by the member.
-        uint256[] lockedUpNFTs;
-    }
-
-    mapping(uint256 => ProposedPaper) public proposals;
-    mapping(address => Reviewer) public reviewers;
-
-    uint256 public numProposals;
-
     modifier reviewerOnly() {
+        bool reviewer = false;
+        for (uint i = 0; i < reviewers.length; i++){
+            if (reviewers[i] == msg.sender) {
+                reviewer = true;
+            }
+        }
         require(
-            reviewers[msg.sender].lockedUpNFTs.length > 0,
+            reviewer,
             "NOT_A_REVIEWER"
         );
         _;
     }
+    address[] public reviewers;
+
+
+    enum VoteType {
+        PUBLISH,
+        REJECT
+    }
+
+    struct ProposedPaper {
+        string paper;
+        bool decided;
+        uint256 rejectVotes;
+        uint256 publishVotes;
+        address [] voterRegistry;
+    }
+
+    mapping(uint256 => ProposedPaper) public proposals;
+
+    uint256 public numProposals;
 
     // Create a Proposal for Research Paper
     function proposePaper(string memory _paper) external returns (uint256) {
         ProposedPaper storage proposal = proposals[numProposals];
-        proposal.paper.basePaper = _paper;
-        proposal.voteDeadline = block.timestamp + 5 minutes;
-
+        proposal.paper = _paper;
         numProposals++;
 
         return numProposals - 1;
     }
 
-    // Request Revisions
 
     // Vote on Proposals
     function voteOnProposal(uint256 _proposalId, VoteType _vote)
@@ -68,10 +63,18 @@ contract PeerReviewDAO {
         reviewerOnly
     {
         ProposedPaper storage proposal = proposals[_proposalId];
-        require(proposal.voteDeadline > block.timestamp, "INACTIVE_PROPOSAL");
-        require(proposal.voterRegister[msg.sender] == false, "ALREADY_VOTED");
+        
+        require(!proposal.decided,  "INACTIVE_PROPOSAL");
 
-        proposal.voterRegister[msg.sender] = true;
+        bool notVoted = true;
+        for (uint i = 0; i < proposal.voterRegistry.length; i++){
+            if (msg.sender == proposal.voterRegistry[i]) {
+                notVoted = false;
+            }
+        }
+        require(notVoted, "ALREADY_VOTED");
+
+        proposal.voterRegistry.push(msg.sender);
         if (_vote == VoteType.PUBLISH) {
             proposal.publishVotes++;
         } else if (_vote == VoteType.REJECT) {
@@ -80,6 +83,16 @@ contract PeerReviewDAO {
     }
 
     // Publish proposal
+    function publishProposal(uint256 _proposalID) external reviewerOnly {
+        ProposedPaper storage proposal = proposals[_proposalID];
+        require(proposal.publishVotes + proposal.rejectVotes > MIN_VOTES, "MORE_VOTES_NEEDED");
+        require(proposal.publishVotes > proposal.rejectVotes, "NOT_PASSED");
+        require(!proposal.decided, "VOTE_COMPLETE");
+
+        proposal.decided = true;
+        acceptedPapers.push(proposal);
+
+    }
 
     // Join the DAO
 
