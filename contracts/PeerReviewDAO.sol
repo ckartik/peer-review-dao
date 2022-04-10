@@ -14,7 +14,7 @@ contract PeerReviewDAO {
         MIN_VOTES = minVotes;
     }
 
-    ProposedPaper[] acceptedPapers;
+    string[] acceptedPapers;
 
     modifier reviewerOnly() {
         bool reviewer = false;
@@ -93,7 +93,7 @@ contract PeerReviewDAO {
         require(!proposal.decided, "VOTE_COMPLETE");
 
         proposal.decided = true;
-        acceptedPapers.push(proposal);
+        acceptedPapers.push(proposal.paper);
 
     }
     function getProposal(uint _id) external view returns (ProposedPaper memory) {
@@ -111,8 +111,12 @@ contract PeerReviewDAO {
         reviewers.push(msg.sender);
     }
 
-    function getReviwers() external view returns  (address[] memory) {
+    function getReviewers() external view returns  (address[] memory) {
         return reviewers;
+    }
+
+    function getAcceptedPapers() external view returns (string[] memory) {
+        return acceptedPapers;
     }
 
     // Leave the DAO
